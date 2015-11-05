@@ -1,0 +1,168 @@
+<html>
+<body>
+
+<p id="demo"></p>
+
+<script>
+	//document.getElementById("demo").innerHTML = "Hello JavaScript!";
+	var xA = 1.0;
+	var yA = 1.0;
+
+	var xB = 1.0001;
+	var yB = 10.0;
+
+	var xC = 14.0;
+	var yC = 0.9999;
+
+	var dA = 6.5;
+	var dB = 8.0;
+	var dC = 10.5;
+
+	//alert("A");
+
+	// Find the coordinate of X
+	var X = positioning(xA, yA, dA, xB, yB, dB, xC, yC, dC);
+
+	alert(X[0].toString() + "  " + X[1].toString());
+
+	// Solve A quadratic equation
+	function solve(A, B, C)
+	{
+		//alert("Solve A:" + A.toString() + ", B:" + B.toString() + ", C:" + C.toString());
+
+		var temp = (B * B) - (4 * A * C);
+		
+		var result = new Array();
+
+		if(temp >= 0)
+		{
+			//alert("Get");
+
+			temp = Math.sqrt(temp);
+
+			result[0] = (temp - B)/(2.0 * A);
+			result[1] = (-temp - B)/(2.0 * A);
+
+			//alert("X0:" + result[0].toString() + " X1:" + result[1].toString());
+		}
+
+		return result;
+	}
+
+	function inCircle(cX, cY, r, x, y)
+	{
+		var dd = (cX - x)*(cX - x) + (cY - y)*(cY - y);
+
+		if(dd <= (r * r))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	// Locate a point that is close to target
+	function locatePoint(x1, y1, d1, x2, y2, d2, x3, y3, d3)
+	{
+		//alert("Locate 1[" + x1.toString() + ", " + y1.toString() + "]; D1=" + d1.toString() +  "  2[" + x2.toString() + ", " + y2.toString() + "]; D2=" + d2.toString() + "   3[" + x3.toString() + ", " + y3.toString() + "]; D3=" + d3.toString()  );	
+
+		var result = new Array();
+		var X = new Array();
+		var Y = new Array();
+
+		var A;
+		var B;
+		var C;
+		
+		if((x2 == x3) && (y2 == y3))
+		{
+			// Invalid Input
+			return result;
+		}
+		else if(x2 == x3)
+		{
+			// x2 = x3, y can be calculated directly, then solve X
+			var y = ((d3 * d3) - (d2 * d2) + (y2 * y2) - (y3 * y3))/(2.0 * (y2 - y3));
+			Y[0] = y;
+			Y[1] = y;
+
+			A = 1.0;
+			B = 2.0 * x2;
+			C = (x2 * x2) + (y * y) - (2.0 * y2 * y) + (y2 * y2) - (d2 * d2);
+
+			X = solve(A, B, C); 
+		}
+		else if(y2 == y3)
+		{
+			// y2 = y3, x can be calculated directly, then solve Y
+			var x = ((d3 * d3) - (d2 * d2) + (x2 * x2) - (x3 * x3))/(2.0 * (x2 - x3));
+			X[0] = x;
+			X[1] = x;
+
+			A = 1.0;
+			B = 2.0 * y2;
+			C = (y2 * y2) + (x * x) - (2.0 * x2 * x) + (x2 * x2) - (d2 * d2);
+
+			Y = solve(A, B, C);
+		}
+		else
+		{
+			var N = (x2 - x3)/(y2 - y3);
+			var M = ((d3 * d3) - (d2 * d2) + (y2 * y2) - (y3 * y3) + (x2 * x2) - (x3 * x3))/(2.0 * (y2 - y3));
+
+			//alert("N: " + N.toString() + " ;  M:" + M.toString());
+
+			A = 1.0 + (N * N);
+			B = (2.0 * N * y2) - (2.0 * x2) - (2.0 * M * N);
+			C = (x2 * x2) + (M * M) - (2.0 * M * y2) + (y2 * y2) - (d2 * d2);
+
+			X = solve(A, B, C);
+		
+			for(var i = 0; i < X.length; i++)
+			{
+				Y[i] = M - (N * X[i]);
+			}
+		}
+
+		for(var j = 0; j < X.length; j++)
+		{
+			if( inCircle(x1, y1, d1, X[j], Y[j]) == true)
+			{
+				//alert("Pass: [" + X[j].toString() + ", " + Y[j].toString() + "]");		
+
+				result[0] = X[j];
+				result[1] = Y[j];
+			}			
+		}
+
+		return result;
+	}
+
+	function positioning(xA, yA, dA, xB, yB, dB, xC, yC, dC)
+	{
+		//alert("Positioning");
+
+		var pA = locatePoint(xA, yA, dA, xB, yB, dB, xC, yC, dC);
+		var pB = locatePoint(xB, yB, dB, xA, yA, dA, xC, yC, dC);
+		var pC = locatePoint(xC, yC, dC, xB, yB, dB, xA, yA, dA);
+
+		//Find the Centroid of Triangle ABC
+		var result = new Array();
+
+		if((pA.length == 2) && (pB.length == 2) && (pC.length == 2))
+		{
+			//alert("Find");
+	
+			result[0] = (pA[0] + pB[0] + pC[0])/3.0;
+			result[1] = (pA[1] + pB[1] + pC[1])/3.0;
+		}
+
+		return result;
+	}
+
+
+</script> 
+
+</body>
+</html>
+
