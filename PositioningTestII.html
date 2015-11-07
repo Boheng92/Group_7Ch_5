@@ -1,0 +1,229 @@
+<html>
+<body>
+
+<p id="demo"></p>
+
+<button onclick="myFunction()">Click me</button>
+
+<script>
+	//document.getElementById("demo").innerHTML = "Hello JavaScript!";
+	var NUM_OF_BEACONS = 4;
+
+	var xA = 0.1;
+	var yA = 0.1;
+
+	var xB = 0.05;
+	var yB = 10.0;
+
+	var xC = 14.85;
+	var yC = 0.03;
+
+	var xD = 14.9;
+	var yD = 10.1;
+
+	var dA = 6.5;
+	var dB = 8.0;
+	var dC = 10.5;
+
+	//alert("A");
+
+	// Find the coordinate of X
+	//var X = positioning(xA, yA, dA, xB, yB, dB, xC, yC, dC);
+
+	//alert(X[0].toString() + "  " + X[1].toString());
+
+	// Solve A quadratic equation
+	function solve(A, B, C)
+	{
+		//alert("Solve A:" + A.toString() + ", B:" + B.toString() + ", C:" + C.toString());
+
+		var temp = (B * B) - (4 * A * C);
+		
+		var result = new Array();
+
+		if(temp >= 0)
+		{
+			//alert("Get");
+
+			temp = Math.sqrt(temp);
+
+			result[0] = (temp - B)/(2.0 * A);
+			result[1] = (-temp - B)/(2.0 * A);
+
+			//alert("X0:" + result[0].toString() + " X1:" + result[1].toString());
+		}
+
+		return result;
+	}
+
+	function inCircle(cX, cY, r, x, y)
+	{
+		var dd = (cX - x)*(cX - x) + (cY - y)*(cY - y);
+
+		if(dd <= (r * r))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	// Locate a point that is close to target
+	function locatePoint(x1, y1, d1, x2, y2, d2, x3, y3, d3)
+	{
+		//alert("Locate 1[" + x1.toString() + ", " + y1.toString() + "]; D1=" + d1.toString() +  "  2[" + x2.toString() + ", " + y2.toString() + "]; D2=" + d2.toString() + "   3[" + x3.toString() + ", " + y3.toString() + "]; D3=" + d3.toString()  );	
+
+		var result = new Array();
+		var X = new Array();
+		var Y = new Array();
+
+		var A;
+		var B;
+		var C;
+		
+		if((x2 == x3) && (y2 == y3))
+		{
+			// Invalid Input
+			return result;
+		}
+		else if(x2 == x3)
+		{
+			// x2 = x3, y can be calculated directly, then solve X
+			var y = ((d3 * d3) - (d2 * d2) + (y2 * y2) - (y3 * y3))/(2.0 * (y2 - y3));
+			Y[0] = y;
+			Y[1] = y;
+
+			A = 1.0;
+			B = 2.0 * x2;
+			C = (x2 * x2) + (y * y) - (2.0 * y2 * y) + (y2 * y2) - (d2 * d2);
+
+			X = solve(A, B, C); 
+		}
+		else if(y2 == y3)
+		{
+			// y2 = y3, x can be calculated directly, then solve Y
+			var x = ((d3 * d3) - (d2 * d2) + (x2 * x2) - (x3 * x3))/(2.0 * (x2 - x3));
+			X[0] = x;
+			X[1] = x;
+
+			A = 1.0;
+			B = 2.0 * y2;
+			C = (y2 * y2) + (x * x) - (2.0 * x2 * x) + (x2 * x2) - (d2 * d2);
+
+			Y = solve(A, B, C);
+		}
+		else
+		{
+			var N = (x2 - x3)/(y2 - y3);
+			var M = ((d3 * d3) - (d2 * d2) + (y2 * y2) - (y3 * y3) + (x2 * x2) - (x3 * x3))/(2.0 * (y2 - y3));
+
+			//alert("N: " + N.toString() + " ;  M:" + M.toString());
+
+			A = 1.0 + (N * N);
+			B = (2.0 * N * y2) - (2.0 * x2) - (2.0 * M * N);
+			C = (x2 * x2) + (M * M) - (2.0 * M * y2) + (y2 * y2) - (d2 * d2);
+
+			X = solve(A, B, C);
+		
+			for(var i = 0; i < X.length; i++)
+			{
+				Y[i] = M - (N * X[i]);
+			}
+		}
+
+		for(var j = 0; j < X.length; j++)
+		{
+			if( inCircle(x1, y1, d1, X[j], Y[j]) == true)
+			{
+				//alert("Pass: [" + X[j].toString() + ", " + Y[j].toString() + "]");		
+
+				result[0] = X[j];
+				result[1] = Y[j];
+			}			
+		}
+
+		return result;
+	}
+
+	function positioning(xA, yA, dA, xB, yB, dB, xC, yC, dC)
+	{
+		//alert("Positioning");
+
+		var pA = locatePoint(xA, yA, dA, xB, yB, dB, xC, yC, dC);
+		var pB = locatePoint(xB, yB, dB, xA, yA, dA, xC, yC, dC);
+		var pC = locatePoint(xC, yC, dC, xB, yB, dB, xA, yA, dA);
+
+		//Find the Centroid of Triangle ABC
+		var result = new Array();
+
+		if((pA.length == 2) && (pB.length == 2) && (pC.length == 2))
+		{
+			//alert("Find");
+	
+			result[0] = (pA[0] + pB[0] + pC[0])/3.0;
+			result[1] = (pA[1] + pB[1] + pC[1])/3.0;
+		}
+
+		return result;
+	}
+
+	function LOCATE(xA, yA, dA, xB, yB, dB, xC, yC, dC, xD, yD, dD)
+	{
+		var result = new Array();
+
+		var A = positioning(xA, yA, dA, xB, yB, dB, xC, yC, dC);
+		var B = positioning(xB, yB, dB, xC, yC, dC, xD, yD, dD);
+		var C = positioning(xA, yA, dA, xC, yC, dC, xD, yD, dD);
+		var D = positioning(xA, yA, dA, xC, yC, dC, xD, yD, dD);
+
+		if(A.length ==2 && B.length == 2 && C.length == 2 && D.length == 2)
+		{
+			result[0] = (A[0] + B[0] + C[0] + D[0])/4;
+			result[1] = (A[1] + B[1] + C[1] + D[1])/4;
+		}
+		return result;
+	}
+
+	function myFunction() 
+	{
+    		//document.getElementById("demo").innerHTML = "Hello World";
+		
+		// X from 2 to 12
+		var XX = 2.0 + (Math.random() * 10.0);
+		// Y from 2 to 8
+		var YY = 2.0 + (Math.random() * 6.0);
+
+		var error = 0.01;
+
+		var d_A = Math.sqrt( (Math.abs(xA - XX) * Math.abs(xA - XX)) + (Math.abs(yA - YY) * Math.abs(yA - YY)) );
+		var d_B = Math.sqrt( (Math.abs(xB - XX) * Math.abs(xB - XX)) + (Math.abs(yB - YY) * Math.abs(yB - YY)) );
+		var d_C = Math.sqrt( (Math.abs(xC - XX) * Math.abs(xC - XX)) + (Math.abs(yC - YY) * Math.abs(yC - YY)) );
+		var d_D = Math.sqrt( (Math.abs(xD - XX) * Math.abs(xD - XX)) + (Math.abs(yD - YY) * Math.abs(yD - YY)) );
+
+
+		var d_Ae = d_A + (Math.random() * error);
+		var d_Be = d_B + (Math.random() * error);
+		var d_Ce = d_C + (Math.random() * error);
+		var d_De = d_D + (Math.random() * error);
+
+		//alert("X :" + XX.toString() + "\nY:" + YY.toString() );
+		
+		var X = LOCATE(xA, yA, d_Ae, xB, yB, d_Be, xC, yC, d_Ce, xD, yD, d_De);
+				
+		if(X.length == 2)
+		{
+			var err = Math.sqrt( (Math.abs(X[0] - XX) * Math.abs(X[0] - XX)) + (Math.abs(X[1] - YY) * Math.abs(X[1] - YY)) );
+
+			var text = "X :" + XX.toString() + "\nY:" + YY.toString() + "\n~X :" + X[0].toString() + "\n~Y :" + X[1].toString() + "\n Err:" + err.toString();
+			//alert("X :" + XX.toString() + "\nY:" + YY.toString() + "\n~X :" + X[0].toString() + "\n~Y :" + X[1].toString() + "\n Err:" + err.toString());
+
+			document.getElementById("demo").innerHTML = text;
+		}
+	}
+
+
+</script> 
+
+</body>
+</html>
+
