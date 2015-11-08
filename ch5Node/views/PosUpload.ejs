@@ -1,98 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<body>
-
-<p>X:<input type="text" id="x_coordinate"/></p>
-
-<p>Y:<input type="text" id="y_coordinate"/></p>
-
-<p id = "RSSI0">0</p>
-<p id = "RSSI1">1</p>
-<p id = "RSSI2">2</p>
-<p id = "RSSI3">3</p>
-
-<button onclick="myFunction()">Upload</button>
-
-<button onclick="updateRSSI0()">0</button>
-<button onclick="updateRSSI1()">1</button>
-<button onclick="updateRSSI2()">2</button>
-<button onclick="updateRSSI3()">3</button>
-
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
 <script>
-
-var rssi0 = 0;
-var rssi1 = 1;
-var rssi2 = 2;
-var rssi3 = 3;
-
-socket.on('rssi message', function(msg){
-    var id = msg.substring(0, 1);
-	var value = parseFloat(msg.substring(2, msg.length()));
-	
-	if(id == "0")
-	{
-		rssi0 = value;
-		document.getElementById("RSSI0").innerHTML = rssi0.toString();
-	}
-	else if(id == "1")
-	{
-		rssi1 = value;
-		document.getElementById("RSSI0").innerHTML = rssi1.toString();
-	}
-	else if(id == "2")
-	{
-		rssi2 = value;
-		document.getElementById("RSSI0").innerHTML = rssi2.toString();
-	}
-	else if(id == "3")
-	{
-		rssi3 = value;
-		document.getElementById("RSSI0").innerHTML = rssi3.toString();
-	}
-	
-  });
-
-
-
-
-
-
-
-
-function myFunction() {
-    var x = document.getElementById("x_coordinate").value;
-    var y = document.getElementById("y_coordinate").value;
-
-    var msg = "[" + rssi0.toString() + "," 
-                  + rssi1.toString() + ","
-                  + rssi2.toString() + ","
-                  + rssi3.toString() + "]"
-                  + "{" + x + "," + y + "}";
-                        
-
-    alert(msg);
-}
-
-function updateRSSI0() {
-    rssi0 = Math.random();
-    document.getElementById("RSSI0").innerHTML = rssi0.toString();
-}
-
-function updateRSSI1() {
-    rssi1 = Math.random();
-    document.getElementById("RSSI1").innerHTML = rssi1.toString();
-}
-
-function updateRSSI2() {
-    rssi2 = Math.random();
-    document.getElementById("RSSI2").innerHTML = rssi2.toString();
-}
-
-function updateRSSI3() {
-    rssi3 = Math.random();
-    document.getElementById("RSSI3").innerHTML = rssi3.toString();
-}
+  var socket = io();
 </script>
-
-</body>
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  var socket = io();
+  $('form').submit(function(){
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });
+  socket.on('rssi message', function(msg){
+    $('#messages').append($('<li>').text(msg));
+  });
+</script>
+  </body>
 </html>

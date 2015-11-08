@@ -67,22 +67,34 @@ function myFunction() {
     var v2 = rssi2.toString();
     var v3 = rssi3.toString();
 
-    if( rssi0 % 100 != 0)
+    //
+    while(x.length < 5)
+    {
+        x = "0" + x;
+    }
+
+    while(y.length < 5)
+    {
+        y = "0" + y;
+    }
+
+
+    while(v0.length < 3)
     {
         v0 = "0" + v0;
     }
 
-    if( rssi1 % 100 != 0)
+    while(v1.length < 3)
     {
         v1 = "0" + v1;
     }
 
-    if( rssi2 % 100 != 0)
+    while(v2.length < 3)
     {
         v2 = "0" + v2;
     }
 
-    if( rssi3 % 100 != 0)
+    while(v3.length < 3)
     {
         v3 = "0" + v3;
     }
@@ -98,6 +110,7 @@ function myFunction() {
 
     alert(msg);
 }
+
 
 function updateRSSI0() {
     rssi0 = Math.random();
