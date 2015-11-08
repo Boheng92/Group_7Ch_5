@@ -16,9 +16,7 @@ var path = require('path');
 var MongoClient;
 var url;
 var mongo = require('mongodb');
-MongoClient = require('mongodb').MongoClient
-				, assert = require('assert');
-
+MongoClient = require('mongodb').MongoClient, assert = require('assert');
 url = 'mongodb://localhost:27017/ch5Node';	//注意这里的DB和collection名字改了，DB叫做ch5Node，collection叫做ch5Collection。
 
 
@@ -119,7 +117,9 @@ sp.on("open", function () {
   
 });
 
-
+//Variables for find query.
+var update = [0, 0, 0, 0];
+var rssis = new Array([4]);
 
 XBeeAPI.on("frame_object", function(frame) {
   if (frame.type == 144){
@@ -129,5 +129,6 @@ XBeeAPI.on("frame_object", function(frame) {
 	
 	//to do find()的代码写在此处，具体如何写find query可以参照前几次的challenge.
 	//代码示例：db.ch5Collection.find({ $and: [{"RSSI0": { $lt: 100, $gt: -100}}, {"X" : {$lt: 100,$gt:-100}}]})
+	//很重要一点！cursor最后一个总是为空！！！
   }
 });
