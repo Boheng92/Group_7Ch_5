@@ -120,6 +120,8 @@ sp.on("open", function () {
 //Variables for find query.
 var update = [0, 0, 0, 0];
 var rssis = new Array([4]);
+var maxRange = 0; //查询范围，请自行定义。
+var minRange = 0;
 
 XBeeAPI.on("frame_object", function(frame) {
   if (frame.type == 144){
@@ -130,5 +132,40 @@ XBeeAPI.on("frame_object", function(frame) {
 	//to do find()的代码写在此处，具体如何写find query可以参照前几次的challenge.
 	//代码示例：db.ch5Collection.find({ $and: [{"RSSI0": { $lt: 100, $gt: -100}}, {"X" : {$lt: 100,$gt:-100}}]})
 	//很重要一点！cursor最后一个总是为空！！！
+	var tempID = frame.data[1];
+	var tempRSSI = frame.data[0];
+	
+	update[tempID] = 1;
+	rssis[tempID] = tempRSSI;
+	
+	if( ( update[0] == 1 ) && ( update[1] == 1) && ( update[2] == 1) && ( update[3] == 1) ){
+		MongoClient.connect(url, function(err, db) {
+			assert.equal(null, err);
+			var collection = db.collection('ch5Collection');
+			var cursor =collection.find({ $and: [{"RSSI0": { $lt: maxRange, $gt: minRange}}, {"RSSI1" : {$lt: maxRange,$gt:minRange}},{"RSSI2": { $lt: maxRange, $gt: minRange}},{"RSSI3": { $lt: maxRange, $gt: minRange}}]});				
+			cursor.sort({X: -1});	//按X坐标递减排列			
+			cursor.limit(10);		//限制数量
+			cursor.each(function(err, doc) 
+			{					
+				if (err) 
+				{
+					console.log(err);
+				} 
+				if (doc != null) 
+				{
+					var tempX = doc.X;
+					var tempY = doc.Y;
+					var emitMsg = '[' + tempX + ']' + '[' + tempY + ']';
+					console.log("checkmsg" + emitMsg);						
+					io.emit("Coordinate Message", emitMsg);
+				}
+				/*else 此处可以对最后的一个null做处理。
+				{
+					io.emit("end of history", 'end');
+				}*/
+			
+			});			
+		});	
+	}
   }
 });
