@@ -137,6 +137,8 @@ XBeeAPI.on("frame_object", function(frame) {
 	
 	update[tempID] = 1;
 	rssis[tempID] = tempRSSI;
+	var maxRange = tempRSSI + 99;; //查询范围，请自行定义。
+	var minRange = tempRSSI - 99;
 	
 	if( ( update[0] == 1 ) && ( update[1] == 1) && ( update[2] == 1) && ( update[3] == 1) ){
 		MongoClient.connect(url, function(err, db) {
