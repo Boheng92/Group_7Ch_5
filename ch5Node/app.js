@@ -120,8 +120,7 @@ sp.on("open", function () {
 //Variables for find query.
 var update = [0, 0, 0, 0];
 var rssis = new Array([4]);
-var maxRange = 0; //查询范围，请自行定义。
-var minRange = 0;
+
 
 XBeeAPI.on("frame_object", function(frame) {
   if (frame.type == 144){
