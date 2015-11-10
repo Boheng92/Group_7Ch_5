@@ -8,8 +8,6 @@ var C = xbee_api.constants;
 var sampleDelay = 3000;
 var portName = process.argv[2];
 var sp;
-var update = [0, 1, 0, 0];
-var rssi = new Array([4]);
 var path = require('path');
 
 //for MonogoDB
@@ -17,7 +15,7 @@ var MongoClient;
 var url;
 var mongo = require('mongodb');
 MongoClient = require('mongodb').MongoClient, assert = require('assert');
-url = 'mongodb://localhost:27017/ch5Node';	//注意这里的DB和collection名字改了，DB叫做ch5Node，collection叫做ch5Collection。
+url = 'mongodb://localhost:27017/ch5Node';
 
 
 io.on('connection', function(socket){
@@ -118,36 +116,37 @@ sp.on("open", function () {
 });
 
 //Variables for find query.
-var update = [0, 0, 0, 0];
+var update = [0, 1, 1, 1];
 var rssis = new Array(0, 0, 0, 0);
 
+var res_X = -999.9;
+var res_Y = -999.9;
 
 XBeeAPI.on("frame_object", function(frame) {
   if (frame.type == 144){
     console.log("Beacon ID: " + frame.data[1] + ", RSSI: " + (frame.data[0]));
 	io.emit("rssi message", frame.data[1] + " " + frame.data[0]);
 	//distance = Math.pow(10.0,((A + rssi)/(10.0*n)));
-	
-	//to do find()的代码写在此处，具体如何写find query可以参照前几次的challenge.
-	//代码示例：db.ch5Collection.find({ $and: [{"RSSI0": { $lt: 100, $gt: -100}}, {"X" : {$lt: 100,$gt:-100}}]})
-	//很重要一点！cursor最后一个总是为空！！！
-	var range = 20;
+	var range = 200;
 
 	var tempID = frame.data[1];
 	var tempRSSI = frame.data[0];
 	
+	var minDist = 65535;
+
+
 	update[tempID] = 1;
+	//console.log(update[0]);
 	rssis[tempID] = tempRSSI;
-	var maxRange = tempRSSI + range;; //查询范围，请自行定义。
-	var minRange = tempRSSI - range;
 	
 	if( ( update[0] == 1 ) && ( update[1] == 1) && ( update[2] == 1) && ( update[3] == 1) ){
+		
 		MongoClient.connect(url, function(err, db) {
 			assert.equal(null, err);
+			
 			var collection = db.collection('ch5Collection');
-			var cursor =collection.find({ $and: [{"RSSI0": { $lt: maxRange, $gt: minRange}}, {"RSSI1" : {$lt: maxRange,$gt:minRange}},{"RSSI2": { $lt: maxRange, $gt: minRange}},{"RSSI3": { $lt: maxRange, $gt: minRange}}]});				
-			cursor.sort({X: -1});	//按X坐标递减排列			
-			cursor.limit(10);		//限制数量
+			var cursor =collection.find({ $and: [{"RSSI0": { $lt: (rssis[0] + range), $gt: (rssis[0] - range)}}, {"RSSI1" : {$lt: (rssis[1] + range), $gt: (rssis[1] - range)}},{"RSSI2": { $lt: (rssis[2] + range), $gt: (rssis[2] - range)}},{"RSSI3": { $lt: (rssis[3] + range), $gt: (rssis[3] - range)}}]});				
+			cursor.sort({X: -1});			
 			cursor.each(function(err, doc) 
 			{					
 				if (err) 
@@ -156,15 +155,30 @@ XBeeAPI.on("frame_object", function(frame) {
 				} 
 				if (doc != null) 
 				{
-					var tempX = doc.X;
-					var tempY = doc.Y;
-					var emitMsg = '[' + tempX + ']' + '[' + tempY + ']';
-					console.log("checkmsg" + emitMsg);						
-					io.emit("Coordinate Message", emitMsg);
+					var tempRSSI = new Array();
+									
+					tempRSSI[0] = doc.RSSI0;
+					tempRSSI[1] = doc.RSSI1;
+					tempRSSI[2] = doc.RSSI2;
+					tempRSSI[3] = doc.RSSI3;
+					
+					
+					var tempDist = (rssis[0] - tempRSSI[0])*(rssis[0] - tempRSSI[0]) + (rssis[1] - tempRSSI[1])*(rssis[1] - tempRSSI[1]) + (rssis[2] - tempRSSI[2])*(rssis[2] - tempRSSI[2]) + (rssis[3] - tempRSSI[3])*(rssis[3] - tempRSSI[3]);
+					
+	
+					if(tempDist < minDist)
+					{
+						minDist = tempDist;
+
+						res_X = doc.X;
+						res_Y = doc.Y;
+					}
 				}
 				else
 				{
-					io.emit("end of coordinate", 'end');
+					var msg = '[' + res_X + ']' + '[' + res_Y + ']';
+					console.log("coordinate msg" + msg);						
+					io.emit("Coordinate Message", msg);
 				}
 			
 			});			
