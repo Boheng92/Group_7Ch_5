@@ -23,9 +23,10 @@
 <script>
 	
     
-    // The two dimensional map array as it sounds is basically your world and what will be drawn.
-    // Each number can represet a different graphic or possible enviroment interaction.
-    // In this tutorial case we only have two possible tiles, zero which is blank and one which is filled.
+    
+	var x_Position_of_arduino=0;
+	var y_Position_of_arduino=0;   //need to be updated from the database
+	window.onload = function () {
     var map = 
      [[1,1,0,0,0,0,0,0,1],
 	  [1,1,0,0,0,0,0,0,1],
@@ -67,6 +68,40 @@
     
         }
     }
+	
+	var updateInterval = 100;	
+	
+	var updateMap = function () {
+		for (var i = 0; i < map.length; i++) {
+			for (var j = 0; j < map[i].length; j++) {
+    
+				// Check if the value is a 1, represeting a graphic should be drawn.
+				if (map[i][j] === 0) {
+                // Draw a rectangle at i & j position * 20 pixels so that
+                // our 20x20 pixel squares are correctly positioned.
+					ctx.fillStyle = '#000000';
+					ctx.fillRect(j * 25, i * 25, 25, 25);
+				}
+    
+			}
+		} 
+        ctx.fillStyle = '#FFFFFF';
+		ctx.fillRect(Math.abs(8-y_Position_of_arduino) * 25, Math.abs(21-x_Position_of_arduino) * 25, 25, 25);   
+       
+		x_Position_of_arduino++;
+		if(x_Position_of_arduino>21){
+		    y_Position_of_arduino++;
+			x_Position_of_arduino=0;
+		}
+		if(y_Position_of_arduino>8)
+			y_Position_of_arduino=0;	
+ 		};
+ 		
+ 		updateMap();		
+    
+ 		// update chart after specified interval 
+ 		setInterval(function(){updateMap()}, updateInterval);
+	}
 
 
 </script>
