@@ -6,8 +6,19 @@
   <body>
 	<h1>Group 7 Challenge 5</h1>
 	<p>Indoor positioning</p>
-  
-	<canvas id="myCanvas" width="440" height="180" style="border:1px solid #d3d3d3;">Your browser does not support the HTML5 canvas tag.</canvas>
+	
+	<style>
+	#test {
+     width: 500px;
+     height:700px;
+     margin: 0px auto;
+	 left: 450px;
+    }
+	</style>
+	
+	<div id="test">
+		<canvas id="main" height="1000px" width="1000px"></canvas>	
+	</div>
     
     <script src="/socket.io/socket.io.js"></script>
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -18,14 +29,52 @@
 	  socket.on('Coordinate Message', function(msg){
 		var X = parseFloat(msg.substring(1, 3));
 		var Y = parseFloat(msg.substring(5, 7));
-		//alert("x" + X + "   y" + Y);
-		
-		var c = document.getElementById("myCanvas");
-		var ctx = c.getContext("2d");
-		ctx.beginPath();
-		ctx.clearRect(0,0,440,180);
-		ctx.arc(X,Y,5,0,2*Math.PI);		
-		ctx.stroke();	
+		var x_Position_of_arduino=X;
+		var y_Position_of_arduino=Y;   //need to be updated from the database
+		var map = 
+     [[1,1,0,0,0,0,0,0,1],
+	  [1,1,0,0,0,0,0,0,1],
+	  [1,0,0,0,0,0,0,0,1],
+	  [1,0,0,0,0,0,0,0,1],
+	  [1,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [1,0,0,0,0,0,0,0,0],
+	  [1,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,0],
+	  [1,0,0,0,0,0,0,0,0], 
+	  [1,0,0,0,0,0,0,0,0],
+	  [0,0,0,0,0,0,0,0,1],
+	  [0,0,0,0,0,0,0,0,1],
+	  [0,0,0,0,0,0,0,0,1],
+	  [0,0,0,0,0,0,0,1,1],
+	  [1,1,0,0,0,0,0,1,1],
+	  [1,1,0,0,0,0,0,1,1]];
+    
+    // The next part grabs the canvas element id of 'main' within our page <body>.
+    var ctx = document.getElementById('main').getContext('2d');
+    
+    // Using two for loops we run through each of the array rows stored and their element values.
+    for (var i = 0; i < map.length; i++) {
+        for (var j = 0; j < map[i].length; j++) {
+    
+            // Check if the value is a 1, represeting a graphic should be drawn.
+            if (map[i][j] === 0) {
+                // Draw a rectangle at i & j position * 20 pixels so that
+                // our 20x20 pixel squares are correctly positioned.
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(j * 25, i * 25, 25, 25);
+            }
+    
+        }
+    }
+	ctx.fillStyle = '#FF000F';
+	ctx.fillRect(Math.abs(8-y_Position_of_arduino) * 25, Math.abs(21-x_Position_of_arduino) * 25, 25, 25);   
+	
 	  });
 	</script>
 </body>

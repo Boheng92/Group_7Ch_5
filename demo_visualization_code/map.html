@@ -87,16 +87,7 @@
 		} 
         ctx.fillStyle = '#FFFFFF';
 		ctx.fillRect(Math.abs(8-y_Position_of_arduino) * 25, Math.abs(21-x_Position_of_arduino) * 25, 25, 25);   
-       
-		x_Position_of_arduino++;
-		if(x_Position_of_arduino>21){
-		    y_Position_of_arduino++;
-			x_Position_of_arduino=0;
-		}
-		if(y_Position_of_arduino>8)
-			y_Position_of_arduino=0;	
- 		};
- 		
+ 	}
  		updateMap();		
     
  		// update chart after specified interval 
