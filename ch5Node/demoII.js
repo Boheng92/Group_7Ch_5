@@ -28,7 +28,7 @@ io.on('connection', function(socket){
     sp.write(msg + "\n");
   });
   //for mongodb
-  socket.on('DB message', function(msg)
+  /*socket.on('DB message', function(msg)
 	{
 	var rssi0 = parseFloat(msg.substring(1,4));
 	var rssi1 = parseFloat(msg.substring(5,8));
@@ -57,9 +57,8 @@ io.on('connection', function(socket){
 				}
 
 			});
-
 	});
-});
+  });*/
 });
 
 http.listen(3000, function(){
@@ -176,6 +175,12 @@ XBeeAPI.on("frame_object", function(frame) {
 				}
 				else
 				{
+					if(parseInt(res_X) < 10){
+						res_X = '0' + res_X;
+					}
+					if(parseInt(res_Y) < 10){
+						res_Y = '0' + res_Y;
+					}
 					var msg = '[' + res_X + ']' + '[' + res_Y + ']';
 					console.log("coordinate msg" + msg);						
 					io.emit("Coordinate Message", msg);
